@@ -5,6 +5,24 @@ from pathlib import Path
 from tqdm import tqdm
 
 
+def parse_limit(value):
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if text in {"all", "full", "none", "0", "-1"}:
+        return None
+    limit = int(text)
+    if limit < 0:
+        return None
+    return limit
+
+
+def maybe_slice(items, limit):
+    if limit is None:
+        return items
+    return items[:limit]
+
+
 def iter_json_array(path, chunk_size=1024 * 1024):
     """Stream objects from a top-level JSON array without loading the file."""
     decoder = json.JSONDecoder()
@@ -50,9 +68,9 @@ def compact_train_row(row, max_positives, max_negatives, max_hard_negatives):
         "dataset": row.get("dataset"),
         "question": row.get("question"),
         "answers": row.get("answers", []),
-        "positive_ctxs": row.get("positive_ctxs", [])[:max_positives],
-        "negative_ctxs": row.get("negative_ctxs", [])[:max_negatives],
-        "hard_negative_ctxs": row.get("hard_negative_ctxs", [])[:max_hard_negatives],
+        "positive_ctxs": maybe_slice(row.get("positive_ctxs", []), max_positives),
+        "negative_ctxs": maybe_slice(row.get("negative_ctxs", []), max_negatives),
+        "hard_negative_ctxs": maybe_slice(row.get("hard_negative_ctxs", []), max_hard_negatives),
     }
 
 
@@ -75,11 +93,11 @@ def main():
     parser.add_argument("--train-file", required=True)
     parser.add_argument("--dev-file", required=True)
     parser.add_argument("--out-dir", default="experiment1/data")
-    parser.add_argument("--max-train", type=int, default=20000)
-    parser.add_argument("--max-dev", type=int, default=1000)
-    parser.add_argument("--max-train-positives", type=int, default=1)
-    parser.add_argument("--max-train-negatives", type=int, default=8)
-    parser.add_argument("--max-train-hard-negatives", type=int, default=8)
+    parser.add_argument("--max-train", type=parse_limit, default=None)
+    parser.add_argument("--max-dev", type=parse_limit, default=None)
+    parser.add_argument("--max-train-positives", type=parse_limit, default=None)
+    parser.add_argument("--max-train-negatives", type=parse_limit, default=None)
+    parser.add_argument("--max-train-hard-negatives", type=parse_limit, default=None)
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)

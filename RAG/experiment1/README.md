@@ -82,14 +82,14 @@ python experiment1/make_dpr_subset.py \
   --train-file DPR-NQ/biencoder-nq-train.json \
   --dev-file DPR-NQ/biencoder-nq-dev.json \
   --out-dir experiment1/data_full \
-  --max-train 100000000 \
-  --max-dev 100000000 \
-  --max-train-positives 100000000 \
-  --max-train-negatives 100000000 \
-  --max-train-hard-negatives 100000000
+  --max-train all \
+  --max-dev all \
+  --max-train-positives all \
+  --max-train-negatives all \
+  --max-train-hard-negatives all
 ```
 
-这里把上限设置成远大于 DPR-NQ 实际规模的数值，作用是“不截断样本”。生成后检查行数：
+这里的 `all` 表示不截断样本，也不截断每条训练样本中的 positive、negative 和 hard negative passages。生成后检查行数：
 
 ```bash
 wc -l experiment1/data_full/train.jsonl
@@ -97,6 +97,14 @@ wc -l experiment1/data_full/dev.jsonl
 ```
 
 报告中应记录实际使用的训练样本数和评估样本数。
+
+如果使用作业系统提交完整实验，可以直接提交脚本：
+
+```bash
+sbatch experiment1/slurm_exp1_debug.sh
+```
+
+这个脚本会使用全量 DPR-NQ 数据，并依次完成原始 BERT baseline、BERT + LoRA、BERT + LoRA + hard negatives、BGE 对比模型评估。
 
 ## 4. Baseline：原始 BERT Mean Pooling
 
