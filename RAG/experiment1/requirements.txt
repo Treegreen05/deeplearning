@@ -1,0 +1,8 @@
+torch
+transformers
+peft
+accelerate
+tqdm
+numpy
+scikit-learn
+

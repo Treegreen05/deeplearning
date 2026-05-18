@@ -1,0 +1,20 @@
+# datasets
+RAG/DPR-NQ/
+RAG/CLAPNQ/
+
+# generated experiment data
+RAG/experiment1/data/
+RAG/experiment1/data_debug/
+RAG/experiment1/checkpoints/
+RAG/experiment1/results/
+
+# model weights
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# cache
+__pycache__/
+.ipynb_checkpoints/
+.cache/
