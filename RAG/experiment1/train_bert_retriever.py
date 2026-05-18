@@ -64,8 +64,12 @@ class Retriever(torch.nn.Module):
         super().__init__()
         self.model = model
 
-    def encode(self, input_ids, attention_mask):
-        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+    def encode(self, input_ids, attention_mask, **model_kwargs):
+        outputs = self.model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            **model_kwargs,
+        )
         token_embeddings = outputs.last_hidden_state
         mask = attention_mask.unsqueeze(-1).to(token_embeddings.dtype)
         pooled = (token_embeddings * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-6)
@@ -190,4 +194,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
