@@ -140,14 +140,14 @@ for K in 1 3 5 10; do
 done
 ```
 
-根据 F1 和 ROUGE-L 选择最佳 k。如果多个 k 接近，优先选择较小的 k。
+根据 F1 和 ROUGE-L 选择最佳 k。如果多个 k 接近，优先选择较小的 k。本次不同 k 实验中，k=5 时 F1 和 ROUGE-L 均达到最高，因此后续固定 k*=5。
 
 ## 7. 固定 k 的四组对比实验
 
-假设最佳 k 为 3：
+本实验选择最佳 k 为 5：
 
 ```bash
-BEST_K=3
+BEST_K=5
 
 python experiment2/generate_answers.py \
   --questions-file CLAPNQ/dev/question_dev_answerable.tsv \
@@ -199,13 +199,13 @@ sbatch experiment2/slurm_exp2.sh
 可以通过环境变量覆盖默认配置：
 
 ```bash
-BEST_K=3 TOP_N=30 sbatch experiment2/slurm_exp2.sh
+BEST_K=5 TOP_N=30 sbatch experiment2/slurm_exp2.sh
 ```
 
 调试时只跑少量样本：
 
 ```bash
-MAX_SAMPLES=20 BEST_K=3 sbatch experiment2/slurm_exp2.sh
+MAX_SAMPLES=20 BEST_K=5 sbatch experiment2/slurm_exp2.sh
 ```
 
 ## 9. 结果表
@@ -214,32 +214,32 @@ MAX_SAMPLES=20 BEST_K=3 sbatch experiment2/slurm_exp2.sh
 
 | k | F1 | ROUGE-L |
 |---:|---:|---:|
-| 1 | | |
-| 3 | | |
-| 5 | | |
-| 10 | | |
+| 1 |0.2298|0.1316|
+| 3 |0.2433 |0.1451 |
+| 5 |0.2503 |0.1467 |
+| 10 |0.2152 |0.1288 |
 
 表 2：RAG + Reranker 下不同 k 的检索效果
 
 | k | Recall@k | MRR@10 | nDCG@k |
 |---:|---:|---:|---:|
-| 1 | | | |
-| 3 | | | |
-| 5 | | | |
-| 10 | | | |
+| 1 | 0.44|0.5533 |0.44 |
+| 3 | 0.6333|0.5533 |0.5537 |
+| 5 |0.71 |0.5533 |0.5855 |
+| 10 | 0.7767|0.5533 |0.6075 |
 
 表 3：固定 k 后四组方法的生成效果
 
 | 方法 | k | F1 | ROUGE-L |
 |---|---:|---:|---:|
-| No RAG | - | | |
-| Random-k | k* | | |
-| RAG Top-k without Reranker | k* | | |
-| RAG Top-k with Reranker | k* | | |
+| No RAG | - |0.1747 |0.0889 |
+| Random-k | 5 |0.1523 |0.0833 |
+| RAG Top-k without Reranker | 5 |0.2251 |0.1324 |
+| RAG Top-k with Reranker | 5 | 0.2503|0.1467 |
 
 表 4：固定 k 后 RAG 方法的检索效果
 
 | 方法 | k | Recall@k | MRR@10 | nDCG@k |
 |---|---:|---:|---:|---:|
-| RAG Top-k without Reranker | k* | | | |
-| RAG Top-k with Reranker | k* | | | |
+| RAG Top-k without Reranker | 5 |0.5033 |0.3027 |0.3394 |
+| RAG Top-k with Reranker | 5 |0.71 | 0.5533|0.5855 |
