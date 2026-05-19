@@ -4,5 +4,5 @@ peft
 accelerate
 tqdm
 numpy
-scikit-learn
+faiss-cpu
 modelscope

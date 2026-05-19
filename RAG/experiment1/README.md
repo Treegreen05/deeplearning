@@ -64,6 +64,24 @@ hf download BAAI/bge-base-en-v1.5 \
   --local-dir models/bge-base-en-v1.5
 ```
 
+如果 Hugging Face 或镜像下载 BGE 不稳定，可以改用魔搭社区 ModelScope：
+
+```bash
+pip install modelscope
+rm -rf models/bge-base-en-v1.5
+mkdir -p models/bge-base-en-v1.5
+
+modelscope download --model BAAI/bge-base-en-v1.5 \
+  --local_dir models/bge-base-en-v1.5
+```
+
+如果上面的 ModelScope 模型 ID 不可用，使用镜像仓库 ID：
+
+```bash
+modelscope download --model AI-ModelScope/bge-base-en-v1.5 \
+  --local_dir models/bge-base-en-v1.5
+```
+
 如果使用本地模型目录，后续命令中的 `--model-name` 改成：
 
 ```bash
@@ -274,10 +292,14 @@ cat experiment1/results/bge_base_en_v15_dev_full.json
 
 | 方法 | 参数量 | MRR@10 | Recall@10 | Recall@20 | Recall@30 |
 |---|---:|---:|---:|---:|---:|
-| BERT-base + mean pooling | 110M | | | | |
-| BERT-base + LoRA | 110M | | | | |
-| BERT-base + LoRA + hard negatives | 110M | | | | |
-| BGE-base-en-v1.5 | 109M | | | | |
+| BERT-base + mean pooling | 110M | 0.2973 | 0.5922 | 0.7332 | 0.8100 |
+| BERT-base + LoRA | 110M | 0.4535 | 0.7501 | 0.8589 | 0.9071 |
+| BERT-base + LoRA + hard negatives | 110M | 0.5221 | 0.8152 | 0.9042 | 0.9404 |
+| BGE-base-en-v1.5 | 109M | 0.7605 | 0.9512 | 0.9785 | 0.9880 |
+
+本次评估使用完整 DPR-NQ dev candidate passages，共 6515 个有效评估样本。结果显示，原始 BERT mean pooling 已经具备一定候选排序能力，但经过 LoRA 对比学习训练后，MRR@10 从 0.2973 提升到 0.4535，Recall@10 从 0.5922 提升到 0.7501。继续引入 hard negatives 后，MRR@10 进一步提升到 0.5221，Recall@10 提升到 0.8152，说明 hard negatives 能帮助模型区分表面相关但不能正确回答问题的 passages。
+
+BGE-base-en-v1.5 在所有指标上仍明显领先，MRR@10 达到 0.7605，Recall@10 达到 0.9512。这说明成熟 embedding 模型经过更大规模、更系统的数据训练后，检索能力仍强于本实验中基于 DPR-NQ 训练 1 个 epoch 的 BERT retriever。
 
 ## 10. 提交作业时需要说明
 

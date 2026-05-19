@@ -42,7 +42,7 @@ download_model_if_needed() {
   local repo_id="$1"
   local local_dir="$2"
 
-  if [[ -f "${local_dir}/config.json" ]]; then
+  if [[ -f "${local_dir}/config.json" && -f "${local_dir}/model.safetensors" ]]; then
     echo "model already exists: ${local_dir}"
     return
   fi
@@ -56,8 +56,33 @@ download_model_if_needed() {
   hf download "${repo_id}" --local-dir "${local_dir}"
 }
 
+download_bge_from_modelscope_if_needed() {
+  local local_dir="$1"
+
+  if [[ -f "${local_dir}/config.json" && -f "${local_dir}/model.safetensors" ]]; then
+    echo "BGE model already exists: ${local_dir}"
+    return
+  fi
+
+  if ! command -v modelscope >/dev/null 2>&1; then
+    echo "modelscope command not found; installing modelscope"
+    pip install modelscope
+  fi
+
+  echo "downloading BGE from ModelScope to ${local_dir}"
+  rm -rf "${local_dir}"
+  mkdir -p "${local_dir}"
+
+  if modelscope download --model BAAI/bge-base-en-v1.5 --local_dir "${local_dir}"; then
+    return
+  fi
+
+  echo "BAAI/bge-base-en-v1.5 was not available from ModelScope; trying AI-ModelScope/bge-base-en-v1.5"
+  modelscope download --model AI-ModelScope/bge-base-en-v1.5 --local_dir "${local_dir}"
+}
+
 download_model_if_needed "google-bert/bert-base-uncased" "${BERT_MODEL}"
-download_model_if_needed "BAAI/bge-base-en-v1.5" "${BGE_MODEL}"
+download_bge_from_modelscope_if_needed "${BGE_MODEL}"
 
 if [[ ! -f "${DATA_DIR}/train.jsonl" || ! -f "${DATA_DIR}/dev.jsonl" ]]; then
   echo "converting full DPR-NQ train/dev JSON files to JSONL"
